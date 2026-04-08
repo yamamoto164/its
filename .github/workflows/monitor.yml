@@ -1,1 +1,28 @@
+name: ITS健保 土曜空き監視
 
+on:
+  schedule:
+    - cron: "0 23,0,1,2,3,4,5,6,7,8,9,10,11,12,13 * * *"
+  workflow_dispatch:
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Python セットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 依存パッケージをインストール
+        run: pip install requests beautifulsoup4
+
+      - name: 監視スクリプトを実行
+        env:
+          GMAIL_ADDRESS:  ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASS: ${{ secrets.GMAIL_APP_PASS }}
+          NOTIFY_TO:      ${{ secrets.NOTIFY_TO }}
+        run: python monitor.py
