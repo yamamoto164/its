@@ -6,10 +6,14 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from email.mime.text import MIMEText
 
-TARGET_URL = (
-    "https://as.its-kenpo.or.jp/calendar_apply/calendar_select"
-    "?s=PWtUTzRRak0zUXpOM0VUUHpWbWNwQkhlbDlWZW1sbWNsWm5KeDBEWnA5VmV5OTJabFJYWWo5VlpqbG1keVYyYw%3D%3D"
-)
+# ── 監視するURLをここに追加していく ──────────────────
+TARGET_URLS = [
+    "https://as.its-kenpo.or.jp/calendar_apply/calendar_select?s=PWtUTzRRak0zUXpOM0VUUHpWbWNwQkhlbDlWZW1sbWNsWm5KeDBEWnA5VmV5OTJabFJYWWo5VlpqbG1keVYyYw%3D%3D",
+    "https://as.its-kenpo.or.jp/calendar_apply/calendar_select?s=PUVETXlNek0zUXpOM0VUUHpWbWNwQkhlbDlWZW1sbWNsWm5KeDBEWnA5VmV5OTJabFJYWWo5VlpqbG1keVYyYw%3D%3D",
+    # 7月分のURLをここに追加
+]
+# ─────────────────────────────────────────────────────
+
 GMAIL_ADDRESS  = os.environ["GMAIL_ADDRESS"]
 GMAIL_APP_PASS = os.environ["GMAIL_APP_PASS"]
 NOTIFY_TO      = os.environ["NOTIFY_TO"]
@@ -59,19 +63,42 @@ def send_gmail(subject, body):
     print("メール送信完了")
 
 
+def check_monthly_reminder():
+    now = datetime.now()
+    if now.day == 1 and now.hour == 0:
+        month = now.month
+        year = now.year
+        send_gmail(
+            subject=f"【ITS健保監視】{year}年{month}月分のURL追加をお忘れなく",
+            body=(
+                f"{year}年{month}月になりました。\n\n"
+                "ITS健保の予約サイトで新しい月のカレンダーURLが追加されている可能性があります。\n\n"
+                "以下の手順でURLを追加してください。\n"
+                "1. https://as.its-kenpo.or.jp/calendar_apply?s=PUVUUGtsMlg1SjNiblZHZGhOMlhsTldhMkpYWnpaU1oxSkhkOWtIZHcxV1o%3D を開く\n"
+                "2. 新しい月のカレンダーページを開いてURLをコピー\n"
+                "3. GitHubのmonitor.pyのTARGET_URLSリストに追加する\n"
+            )
+        )
+        print("月次リマインドメール送信完了")
+
+
 def main():
     print(f"[{datetime.now().isoformat()}] 監視開始")
-    try:
-        soup = fetch_calendar(TARGET_URL)
-    except requests.RequestException as e:
-        print(f"ページ取得失敗: {e}")
-        return
 
-    available = find_available_saturdays(soup)
+    check_monthly_reminder()
 
-    if available:
+    all_available = []
+    for url in TARGET_URLS:
+        try:
+            soup = fetch_calendar(url)
+            available = find_available_saturdays(soup)
+            all_available.extend(available)
+        except requests.RequestException as e:
+            print(f"ページ取得失敗: {url}\n{e}")
+
+    if all_available:
         lines = ["ITS健保施設 土曜日に空きが出ました!\n"]
-        for item in available:
+        for item in all_available:
             href = item["href"]
             full_url = (
                 f"https://as.its-kenpo.or.jp{href}"
