@@ -10,6 +10,7 @@ from email.mime.text import MIMEText
 TARGET_URLS = [
     "https://as.its-kenpo.or.jp/calendar_apply/calendar_select?s=PWtUTzRRak0zUXpOM0VUUHpWbWNwQkhlbDlWZW1sbWNsWm5KeDBEWnA5VmV5OTJabFJYWWo5VlpqbG1keVYyYw%3D%3D",
     "https://as.its-kenpo.or.jp/calendar_apply/calendar_select?s=PUVETXlNek0zUXpOM0VUUHpWbWNwQkhlbDlWZW1sbWNsWm5KeDBEWnA5VmV5OTJabFJYWWo5VlpqbG1keVYyYw%3D%3D",
+    "https://as.its-kenpo.or.jp/calendar_apply/calendar_select?s=PUlETTRRek14Y3pOM0VUUHpWbWNwQkhlbDlWZW1sbWNsWm5KeDBEWnA5VmV5OTJabFJYWWo5VlpqbG1keVYyYw%3D%3D",
     # 7月分のURLをここに追加
 ]
 # ─────────────────────────────────────────────────────
